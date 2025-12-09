@@ -1,0 +1,47 @@
+###############################################################################
+# VECTOR CONFIG - Docker log collector (portable across machines)
+###############################################################################
+
+[sources.docker]
+type = "docker_logs"
+exclude_containers = ["vector", "grafana", "loki"]
+
+###############################################################################
+# PARSE JSON logs if they are JSON
+###############################################################################
+[transforms.parse_json]
+type = "remap"
+inputs = ["docker"]
+source = '''
+structured, err = parse_json(.message)
+if err == null {
+  . = merge!(., structured)
+}
+'''
+
+###############################################################################
+# ENRICH EVENT WITH A TOP-LEVEL SERVICE FIELD
+###############################################################################
+[transforms.enrich]
+type = "remap"
+inputs = ["parse_json"]
+source = '''
+if exists(.service) {
+  .service = .service
+} else {
+  .service = .container_name
+}
+'''
+
+###############################################################################
+# SEND TO LOKI
+###############################################################################
+[sinks.loki]
+type = "loki"
+inputs = ["enrich"]
+endpoint = "http://loki:3100"
+encoding.codec = "json"
+
+[sinks.loki.labels]
+container = "{{ container_name }}"
+service = "{{ service }}"
