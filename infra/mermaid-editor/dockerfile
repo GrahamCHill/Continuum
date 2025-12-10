@@ -1,0 +1,57 @@
+# infra/mermaid-editor/Dockerfile
+# Build and serve mermaid-live-editor under /mermaid-editor
+
+# Stage 1: build mermaid-live-editor
+FROM node:20-alpine AS builder
+LABEL maintainer="you@example.com"
+WORKDIR /app
+
+# Tools for cloning/building and text processing
+RUN apk add --no-cache git python3 make g++ perl
+
+ARG BUILD_REF=main
+RUN git clone --depth 1 --branch ${BUILD_REF} https://github.com/mermaid-js/mermaid-live-editor.git .
+
+# Install & build
+RUN npm install --no-audit --silent
+RUN npm run build
+
+# ---------- Post-build fixes (idempotent) ----------
+# No path rewriting needed - app serves from root at mermaid.test
+# Original paths in /_app/ are correct as-is
+RUN set -eux; \
+    DIRS=". .svelte-kit/output .svelte-kit/output/client .svelte-kit/output/prerendered/pages build dist public static"; \
+    for d in $DIRS; do \
+      if [ -d "$d" ]; then \
+        echo "Directory $d exists"; \
+      fi; \
+    done
+
+# Collect outputs into /app/out (single folder we will COPY from)
+RUN set -eux; \
+    OUT=/app/out; \
+    rm -rf "$OUT"; \
+    mkdir -p "$OUT"; \
+    if [ -d .svelte-kit/output/prerendered/pages ]; then cp -a .svelte-kit/output/prerendered/pages/. "$OUT/"; fi; \
+    if [ -d .svelte-kit/output/client/_app ]; then mkdir -p "$OUT/_app" && cp -a .svelte-kit/output/client/_app/. "$OUT/_app/"; fi; \
+    if [ -d build ]; then cp -a build/. "$OUT/"; fi; \
+    if [ -d dist ]; then cp -a dist/. "$OUT/"; fi; \
+    if [ -d public ]; then cp -a public/. "$OUT/"; fi; \
+    if [ -d static ]; then cp -a static/. "$OUT/"; fi; \
+    # If no versions.json present, add a minimal one (use printf to avoid heredoc complications)
+    if [ ! -f "$OUT/versions.json" ]; then \
+      printf '%s' '{"versions":[{"version":"10.4.0","url":"https://unpkg.com/mermaid@10.4.0/dist/mermaid.min.js"}],"latest":"10.4.0"}' > "$OUT/versions.json"; \
+    fi; \
+    echo "out contents:"; ls -la "$OUT" || true
+
+# Stage 2: serve with nginx
+FROM nginx:stable-alpine AS runtime
+
+# Copy the prepared output folder into the nginx docroot at the app root
+COPY --from=builder /app/out /usr/share/nginx/html
+
+# Nginx config (ensure you have infra/mermaid-editor/nginx/default.conf)
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

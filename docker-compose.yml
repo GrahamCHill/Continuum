@@ -3,7 +3,7 @@ services:
   ## TRAEFIK — Reverse Proxy
   ######################################################################
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.6.4
     command:
       - "--providers.docker=true"
       - "--providers.docker.exposedByDefault=false"
@@ -109,6 +109,28 @@ services:
       - "3001:3000"
     depends_on:
       - loki
+
+  ######################################################################
+  ## Mermaid — For System Architecture Diagrams
+  ######################################################################
+  mermaid-editor:
+    build:
+      context: ./infra/mermaid-editor
+      args:
+        - BUILD_REF=main   # change to a tag if you prefer
+    image: projection2-mermaid-editor:local
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      - NODE_ENV=production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mermaid.rule=Host(`mermaid.test`)"
+      - "traefik.http.routers.mermaid.entrypoints=web"
+      - "traefik.http.services.mermaid.loadbalancer.server.port=80"
+
+
 
 volumes:
   db_data:

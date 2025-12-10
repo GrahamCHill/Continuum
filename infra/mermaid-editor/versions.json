@@ -1,0 +1,9 @@
+{
+  "versions": [
+    {
+      "version": "10.4.0",
+      "url": "https://unpkg.com/mermaid@10.4.0/dist/mermaid.min.js"
+    }
+  ],
+  "latest": "10.4.0"
+}
