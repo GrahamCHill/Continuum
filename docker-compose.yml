@@ -112,36 +112,52 @@ services:
     image: ollama/ollama:latest
     container_name: ollama
     restart: unless-stopped
-    entrypoint: ["/bin/sh", "/pull-models.sh"]
     volumes:
       - ollama_data:/root/.ollama
-      - ./infra/ollama/pull-models.sh:/pull-models.sh    # stores downloaded models
+      - ./infra/ollama/pull-models.sh:/pull-models.sh
     ports:
-      - "11434:11434"                  # API port
-    environment:
-      - OLLAMA_KEEP_ALIVE=300          # keep models warm for 5 minutes
+      - "11434:11434"
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "
+        ollama serve &
+        sleep 4 &&
+        sh /pull-models.sh &&
+        wait
+      "
     labels:
-      - "traefik.enable=false"         # not exposed to public internet
+      - "traefik.enable=false"
+
 
     ## Nvidia accelerated version, default off
-    # ollama:
-    # image: ollama/ollama:latest
-    # container_name: ollama
-    # restart: unless-stopped
-    # runtime: nvidia
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - capabilities: [gpu]
-    # environment:
-    #   - NVIDIA_VISIBLE_DEVICES=all
-    # entrypoint: ["/bin/sh", "/pull-models.sh"]
-    # volumes:
-    #   - ollama_data:/root/.ollama
-    #   - ./infra/ollama/pull-models.sh:/pull-models.sh    # stores downloaded models
-    # ports:
-    #   - "11434:11434"
+    # ollama-gpu:
+    #   image: ollama/ollama:latest
+    #   container_name: ollama-gpu
+    #   restart: unless-stopped
+    #   runtime: nvidia
+    #   environment:
+    #     - NVIDIA_VISIBLE_DEVICES=all
+    #     - OLLAMA_KEEP_ALIVE=300
+    #   deploy:
+    #     resources:
+    #       reservations:
+    #         devices:
+    #           - capabilities: [gpu]
+    #   volumes:
+    #     - ollama_data:/root/.ollama
+    #     - ./infra/ollama/pull-models.sh:/pull-models.sh
+    #   ports:
+    #     - "11435:11434"
+    #   entrypoint: ["/bin/sh", "-c"]
+    #   command: >
+    #     "
+    #       ollama serve &
+    #       sleep 4 &&
+    #       sh /pull-models.sh &&
+    #       wait
+    #     "
+    #   labels:
+    #     - "traefik.enable=false"
 
 
   ######################################################################

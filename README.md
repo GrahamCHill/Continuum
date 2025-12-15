@@ -49,3 +49,13 @@ Without the hosts file entry:
 - The request will not include the correct Host name.
 - Traefik will not match the router.
 - Traefik returns 404 page not found.
+
+
+## Notes
+
+On macOS/Linux systems you may have to run 
+```
+chmod +x infra/ollama/pull-models.sh
+```
+
+to get the ollama service to run and pull the initial LLMs you have chosen.
