@@ -9,11 +9,15 @@ from audit import audit_log
 from s3_storage import upload_diagram, download_diagram, delete_diagram, get_presigned_url
 from datetime import datetime
 import uuid
+from app.llm.hybrid_router import HybridLLMRouter
+
 
 GO_SERVICE_URL = os.getenv("GO_SERVICE_URL")
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 app = FastAPI()
+llm = HybridLLMRouter()
+
 
 # Add CORS middleware
 app.add_middleware(
@@ -299,3 +303,33 @@ async def audit_middleware(request: Request, call_next):
     )
 
     return response
+
+
+class ChatMessage(BaseModel):
+    role: str  # "user", "assistant", "system"
+    content: str
+
+class ChatRequest(BaseModel):
+    messages: List[ChatMessage]
+    force_local: Optional[bool] = False
+
+@app.post("/api/chat")
+async def chat_endpoint(request: ChatRequest):
+    """
+    Hybrid AI Chat Endpoint (Groq + Ollama fallback).
+    Uses Groq when available, and automatically falls back
+    to Ollama when Groq is unavailable or the content is sensitive.
+    """
+    try:
+        # Convert Pydantic models to dicts for router
+        messages = [m.dict() for m in request.messages]
+
+        response = llm.chat(
+            messages=messages,
+            force_local=request.force_local
+        )
+
+        return {"response": response}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
