@@ -1,0 +1,10 @@
+[
+  {
+    "id": "kanban-board-summary",
+    "component": "KanbanBoardWidget",
+    "mount": "project.sidebar",
+    "props": {
+      "apiBase": "/modules/kanban/api"
+    }
+  }
+]

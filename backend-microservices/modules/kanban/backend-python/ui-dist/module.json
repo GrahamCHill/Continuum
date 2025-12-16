@@ -1,0 +1,11 @@
+{
+  "id": "kanban",
+  "name": "Kanban Boards",
+  "version": "0.1.0",
+  "description": "Project planning and task tracking using Kanban boards",
+  "icon": "kanban",
+  "entrypoints": {
+    "routes": "/routes.json",
+    "widgets": "/widgets.json"
+  }
+}

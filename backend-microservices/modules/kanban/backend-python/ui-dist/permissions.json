@@ -1,0 +1,7 @@
+{
+  "scopes": [
+    "kanban.read",
+    "kanban.write"
+  ],
+  "default": "kanban.read"
+}

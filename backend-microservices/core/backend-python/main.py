@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from api import diagrams, chat, health
 from audit.middleware import audit_middleware
+from api import diagrams, chat, health, modules
 
 app = FastAPI()
 
@@ -19,3 +18,4 @@ app.middleware("http")(audit_middleware)
 app.include_router(health.router)
 app.include_router(diagrams.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+

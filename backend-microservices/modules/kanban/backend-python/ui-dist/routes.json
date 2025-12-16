@@ -1,0 +1,9 @@
+[
+  {
+    "path": "/projects/:projectId/kanban",
+    "title": "Kanban Board",
+    "component": "KanbanBoardPage",
+    "apiBase": "/modules/kanban/api",
+    "layout": "default"
+  }
+]

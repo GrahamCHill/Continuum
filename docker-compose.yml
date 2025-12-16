@@ -72,6 +72,27 @@ services:
 
 
   ######################################################################
+  ## KANBAN MODULE — UI + API
+  ######################################################################
+  kanban:
+    build: ./backend-microservices/modules/kanban/backend-python
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+
+      # Router
+      - "traefik.http.routers.kanban.rule=Host(`api.test`) && PathPrefix(`/modules/kanban`)"
+      - "traefik.http.routers.kanban.entrypoints=web"
+
+      # Strip prefix before forwarding
+      - "traefik.http.middlewares.kanban-strip.stripprefix.prefixes=/modules/kanban"
+      - "traefik.http.routers.kanban.middlewares=kanban-strip"
+
+      # Internal port
+      - "traefik.http.services.kanban.loadbalancer.server.port=8000"
+
+
+  ######################################################################
   ## POSTGRESQL — Startup SQL + audit tables
   ######################################################################
   db:
@@ -82,6 +103,7 @@ services:
       - ./db/00-init.sql:/docker-entrypoint-initdb.d/00-init.sql
       - ./db/01-audit.sql:/docker-entrypoint-initdb.d/01-audit.sql
       - ./db/02-diagrams.sql:/docker-entrypoint-initdb.d/02-diagrams.sql
+      - ./db/03-kanban.sql:/docker-entrypoint-initdb.d/03-kanban.sql
 
 
   ######################################################################
