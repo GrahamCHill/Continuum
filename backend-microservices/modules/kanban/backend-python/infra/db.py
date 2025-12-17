@@ -1,14 +1,15 @@
-import os
-import psycopg2
-
-
-def get_db_connection():
-    """
-    Returns a new PostgreSQL connection.
-    Uses DATABASE_URL from environment.
-    """
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise RuntimeError("DATABASE_URL is not set")
-
-    return psycopg2.connect(database_url)
+def ensure_tables(conn):
+    with conn.cursor() as cur:
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS boards (
+            id UUID PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            CONSTRAINT fk_project
+                FOREIGN KEY (project_id)
+                REFERENCES projects(id)
+                ON DELETE CASCADE
+        )
+        """)
+        conn.commit()

@@ -1,3 +1,29 @@
+# Continuum
+
+Continuum is a modular project intelligence platform designed to explore scalable system architecture, modular backend services, and declarative UI composition.
+
+At its core, Continuum treats a project as a root aggregate. All functionality—planning, documentation, analysis, and automation—is implemented as independently deployable modules that attach to projects via strict data contracts.
+
+## Architecture
+
+- Core service provides project identity, module discovery, and shared infrastructure
+- Modules are autonomous services with their own schemas and APIs
+- PostgreSQL enforces referential integrity across modules
+- Frontend renders module-defined UI metadata using generic components
+- No micro-frontends or runtime JavaScript injection
+
+## Core Concepts
+## Modules
+## UI Composition Model
+## Tech Stack
+## Running Locally
+## Design Tradeoffs
+
+- Declarative UI metadata was chosen over micro-frontends to reduce runtime complexity
+- Module schemas are initialized at startup to avoid Docker init race conditions
+- UUIDs are used for all core identifiers to support distributed deployment
+
+
 ```shell
 docker compose -f docker-compose.dev.yml --env-file .env.dev up --build
 ```

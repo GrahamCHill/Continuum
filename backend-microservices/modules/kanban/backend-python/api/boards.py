@@ -11,3 +11,5 @@ class BoardCreate(BaseModel):
 @router.post("/boards")
 def create(board: BoardCreate):
     return create_board(board.project_id, board.name)
+
+
