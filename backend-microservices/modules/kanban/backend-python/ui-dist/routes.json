@@ -1,9 +1,12 @@
-[
-  {
-    "path": "/projects/:projectId/kanban",
-    "title": "Kanban Board",
-    "component": "KanbanBoardPage",
-    "apiBase": "/modules/kanban/api",
-    "layout": "default"
-  }
-]
+{
+  "routes": [
+    {
+      "path": "/api/boards",
+      "methods": ["GET", "POST"]
+    },
+    {
+      "path": "/api/cards",
+      "methods": ["GET", "POST", "PATCH"]
+    }
+  ]
+}

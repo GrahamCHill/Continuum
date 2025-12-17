@@ -1,10 +1,13 @@
-[
-  {
-    "id": "kanban-board-summary",
-    "component": "KanbanBoardWidget",
-    "mount": "project.sidebar",
-    "props": {
-      "apiBase": "/modules/kanban/api"
+{
+  "widgets": [
+    {
+      "id": "boards",
+      "type": "collection",
+      "title": "Kanban Boards",
+      "resource": "boards",
+      "layout": "board",
+      "endpoint": "/modules/kanban/api/boards",
+      "project_scoped": true
     }
-  }
-]
+  ]
+}

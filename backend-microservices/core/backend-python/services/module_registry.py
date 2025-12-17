@@ -1,37 +1,46 @@
+import json
 import os
-import httpx
-from typing import List
+from shared.schemas.module_manifest import (
+    ModuleManifest,
+    ModuleWidget,
+    ModuleRoute,
+)
 
-from shared.schemas.module_manifest import ModuleManifest
-
-
-MODULE_ENV_PREFIX = "MODULE_"
-
-
-def _module_urls() -> List[str]:
-    urls = []
-    for key, value in os.environ.items():
-        if key.startswith(MODULE_ENV_PREFIX):
-            urls.append(value)
-    return urls
+MODULES_PATH = "/modules"
 
 
-def load_modules() -> List[ModuleManifest]:
-    modules: List[ModuleManifest] = []
+def load_module(module_name: str) -> ModuleManifest:
+    base = os.path.join(MODULES_PATH, module_name, "backend-python", "ui-dist")
 
-    for base_url in _module_urls():
+    with open(os.path.join(base, "module.json")) as f:
+        meta = json.load(f)
+
+    with open(os.path.join(base, "routes.json")) as f:
+        routes_raw = json.load(f)["routes"]
+
+    with open(os.path.join(base, "widgets.json")) as f:
+        widgets_raw = json.load(f)["widgets"]
+
+    with open(os.path.join(base, "permissions.json")) as f:
+        perms = json.load(f)["permissions"]
+
+    return ModuleManifest(
+        id=meta["id"],
+        name=meta["name"],
+        version=meta["version"],
+        description=meta["description"],
+        scope="project",
+        permissions=perms,
+        routes=[ModuleRoute(**r) for r in routes_raw],
+        widgets=[ModuleWidget(**w) for w in widgets_raw],
+    )
+
+
+def load_modules():
+    modules = []
+    for name in os.listdir(MODULES_PATH):
         try:
-            resp = httpx.get(
-                f"{base_url}/internal/module-manifest",
-                timeout=2.0,
-            )
-            resp.raise_for_status()
-
-            manifest = ModuleManifest(**resp.json())
-            modules.append(manifest)
-
-        except Exception as e:
-            # IMPORTANT: failure of a module must not break the core
-            print(f"[modules] failed to load {base_url}: {e}")
-
+            modules.append(load_module(name))
+        except Exception:
+            continue
     return modules

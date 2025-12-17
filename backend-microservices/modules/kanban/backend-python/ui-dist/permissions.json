@@ -1,7 +1,6 @@
 {
-  "scopes": [
+  "permissions": [
     "kanban.read",
     "kanban.write"
-  ],
-  "default": "kanban.read"
+  ]
 }

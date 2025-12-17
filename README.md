@@ -2,7 +2,7 @@
 
 Continuum is a modular project intelligence platform designed to explore scalable system architecture, modular backend services, and declarative UI composition.
 
-At its core, Continuum treats a project as a root aggregate. All functionality—planning, documentation, analysis, and automation—is implemented as independently deployable modules that attach to projects via strict data contracts.
+At its core, Continuum treats a project as a root aggregate. All functionality—planning, documentation, analysis, and automation — is implemented as independently deployable modules that attach to projects via strict data contracts.
 
 ## Architecture
 

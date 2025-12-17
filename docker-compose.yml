@@ -90,6 +90,10 @@ services:
 
       # Internal port
       - "traefik.http.services.kanban.loadbalancer.server.port=8000"
+    
+    depends_on:
+      - db
+      - minio
 
 
   ######################################################################
@@ -102,8 +106,8 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./db/00-init.sql:/docker-entrypoint-initdb.d/00-init.sql
       - ./db/01-audit.sql:/docker-entrypoint-initdb.d/01-audit.sql
-      - ./db/02-diagrams.sql:/docker-entrypoint-initdb.d/02-diagrams.sql
-      - ./db/03-kanban.sql:/docker-entrypoint-initdb.d/03-kanban.sql
+      - ./db/02-projects.sql:/docker-entrypoint-initdb.d/02-projects.sql
+      - ./db/03-diagrams.sql:/docker-entrypoint-initdb.d/03-diagrams.sql
 
 
   ######################################################################

@@ -1,22 +1,26 @@
 from pydantic import BaseModel
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict
 
 
-class ModuleNavigation(BaseModel):
-    label: str
-    icon: Optional[str] = None
+class ModuleRoute(BaseModel):
+    path: str
+    methods: List[str]
 
 
-class ModuleUI(BaseModel):
-    type: Literal["iframe"]
-    entry: str
-    navigation: Optional[ModuleNavigation] = None
+class ModuleWidget(BaseModel):
+    id: str
+    type: Literal["table", "board", "list", "iframe"]
+    title: str
+    data_endpoint: Optional[str] = None
+    iframe_src: Optional[str] = None
 
 
 class ModuleManifest(BaseModel):
     id: str
     name: str
     version: str
-    base_path: str
-    capabilities: List[str]
-    ui: Optional[ModuleUI] = None
+    description: str
+    widgets: List[ModuleWidget]
+    routes: List[ModuleRoute]
+    permissions: List[str]
+    scope: Literal["project", "global"]
